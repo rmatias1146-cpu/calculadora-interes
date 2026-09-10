@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Tasa de Interés y Recargo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f6f8;
+      color: #333;
+      margin: 0;
+    }
+    .card {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 450px;
+      margin: auto;
+    }
+    h2 {
+      margin-top: 0;
+      color: #1a73e8;
+      text-align: center;
+      font-size: 1.4em;
+    }
+    .subtitle {
+      text-align: center;
+      color: #5f6368;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95em;
+    }
+    input[type=number] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      outline: none;
+    }
+    input[type=number]:focus {
+      border-color: #1a73e8;
+    }
+    input[type=range] {
+      width: 100%;
+      margin: 8px 0;
+    }
+    .value-display {
+      font-size: 1em;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .result-box {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .result-box.highlight {
+      background: #e8f0fe;
+      border-color: #aecbfa;
+      grid-column: span 2;
+    }
+    .result-title {
+      font-size: 0.85em;
+      color: #5f6368;
+    }
+    .result-value {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #d93025;
+      margin-top: 4px;
+    }
+    .result-box.highlight .result-value {
+      color: #1967d2;
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Calculadora de Interés y Recargo</h2>
+  <div class="subtitle">Calcula el % de interés total y la Tasa Anual (TNA)</div>
+  
+  <div class="field">
+    <label for="contado">Precio de Contado ($)</label>
+    <input type="number" id="contado" value="900000" placeholder="Ej: 900000" oninput="calcular()">
+  </div>
+
+  <div class="field">
+    <label for="financiado">Valor Cuota Total o Final Financiado ($)</label>
+    <input type="number" id="financiado" value="1200000" placeholder="Ej: 1200000" oninput="calcular()">
+  </div>
+
+  <div class="field">
+    <label for="cuotas">Cantidad de Cuotas</label>
+    <input type="range" id="cuotas" min="1" max="36" step="1" value="6" oninput="calcular()">
+    <div class="value-display" id="cuotasValor">6 cuotas</div>
+  </div>
+
+  <div class="results-grid">
+    <div class="result-box">
+      <div class="result-title">Recargo Total ($)</div>
+      <div class="result-value" id="resDiferencia">$300.000</div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-title">Interés Total (%)</div>
+      <div class="result-value" id="resInteresTotal">33,33%</div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-title">Valor por Cuota ($)</div>
+      <div class="result-value" id="resCuota">$200.000</div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-title">Interés Mensual (TEM)</div>
+      <div class="result-value" id="resInteresMensual">5,56%</div>
+    </div>
+
+    <div class="result-box highlight">
+      <div class="result-title">Tasa Nominal Anual Estimada (TNA)</div>
+      <div class="result-value" id="resTNA">66,67%</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function calcular() {
+    const contado = parseFloat(document.getElementById('contado').value) || 0;
+    const financiado = parseFloat(document.getElementById('financiado').value) || 0;
+    const cuotas = parseInt(document.getElementById('cuotas').value);
+
+    document.getElementById('cuotasValor').innerText = cuotas + (cuotas === 1 ? ' cuota' : ' cuotas');
+
+    if (contado <= 0 || financiado <= 0) {
+      document.getElementById('resDiferencia').innerText = '$0';
+      document.getElementById('resInteresTotal').innerText = '0%';
+      document.getElementById('resCuota').innerText = '$0';
+      document.getElementById('resInteresMensual').innerText = '0%';
+      document.getElementById('resTNA').innerText = '0%';
+      return;
+    }
+
+    const recargoTotal = financiado - contado;
+    const porcentajeInteresTotal = ((financiado - contado) / contado) * 100;
+    const valorCuota = financiado / cuotas;
+    const porcentajeMensual = porcentajeInteresTotal / cuotas;
+    const tna = porcentajeMensual * 12;
+
+    document.getElementById('resDiferencia').innerText = '$' + Math.max(0, Math.round(recargoTotal)).toLocaleString('es-AR');
+    document.getElementById('resInteresTotal').innerText = porcentajeInteresTotal.toFixed(2).replace('.', ',') + '%';
+    document.getElementById('resCuota').innerText = '$' + Math.round(valorCuota).toLocaleString('es-AR');
+    document.getElementById('resInteresMensual').innerText = porcentajeMensual.toFixed(2).replace('.', ',') + '%';
+    document.getElementById('resTNA').innerText = tna.toFixed(2).replace('.', ',') + '%';
+  }
+
+  calcular();
+</script>
+
+</body>
+</html>
